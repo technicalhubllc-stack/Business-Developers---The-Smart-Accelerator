@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { UserRole, UserProfile, LevelData, TaskRecord, ProgramRating, ACADEMY_BADGES, SECTORS } from '../types';
 import { playPositiveSound, playCelebrationSound } from '../services/audioService';
 import { storageService } from '../services/storageService';
+import { suggestIconsForLevels } from '../services/geminiService';
 import { LevelView } from './LevelView';
 import { ProgramEvaluation } from './ProgramEvaluation';
 import { Certificate } from './Certificate';
@@ -23,8 +24,8 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
   const [existingRating, setExistingRating] = useState<ProgramRating | null>(null);
   const [earnedBadgeIds, setEarnedBadgeIds] = useState<string[]>([]);
   const [showFullCert, setShowFullCert] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
   
-  // Profile State
   const [profileData, setProfileData] = useState<UserProfile>(user);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -69,6 +70,33 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
     return { progress, avgScore, completedCount: completed };
   }, [roadmap, tasks]);
 
+  const handleOptimizeUI = async () => {
+    setIsOptimizing(true);
+    playPositiveSound();
+    try {
+      const result = await suggestIconsForLevels({ 
+        name: profileData.startupName, 
+        industry: profileData.industry 
+      });
+      
+      const updatedRoadmap = roadmap.map(level => {
+        const suggestion = result.suggestions.find((s: any) => s.levelId === level.id);
+        if (suggestion) {
+          return { ...level, icon: suggestion.icon, customColor: suggestion.color };
+        }
+        return level;
+      });
+
+      setRoadmap(updatedRoadmap);
+      localStorage.setItem(`db_roadmap_${user.uid}`, JSON.stringify(updatedRoadmap));
+      playCelebrationSound();
+    } catch (e) {
+      console.error("Optimization failed", e);
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
   const getGradientForColor = (color?: string) => {
     switch(color) {
       case 'blue': return 'from-blue-500 to-blue-700';
@@ -78,6 +106,30 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
       case 'rose': return 'from-rose-500 to-rose-700';
       case 'slate': return 'from-slate-700 to-slate-900';
       default: return 'from-blue-500 to-indigo-600';
+    }
+  };
+
+  const getTailwindBgColor = (color?: string) => {
+    switch(color) {
+      case 'blue': return 'bg-blue-500';
+      case 'emerald': return 'bg-emerald-500';
+      case 'indigo': return 'bg-indigo-500';
+      case 'amber': return 'bg-amber-500';
+      case 'rose': return 'bg-rose-500';
+      case 'slate': return 'bg-slate-700';
+      default: return 'bg-blue-600';
+    }
+  };
+
+  const getTailwindShadowColor = (color?: string) => {
+    switch(color) {
+      case 'blue': return 'shadow-blue-500/30';
+      case 'emerald': return 'shadow-emerald-500/30';
+      case 'indigo': return 'shadow-indigo-500/30';
+      case 'amber': return 'shadow-amber-500/30';
+      case 'rose': return 'shadow-rose-500/30';
+      case 'slate': return 'shadow-slate-500/30';
+      default: return 'shadow-blue-500/30';
     }
   };
 
@@ -96,6 +148,10 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
   };
 
   const handleSaveProfile = () => {
+    if (user.isDemo) {
+      alert("عذراً، لا يمكن حفظ التغييرات الدائمة في نمط الحساب التجريبي.");
+      return;
+    }
     setIsSaving(true);
     storageService.updateUser(user.uid, {
       firstName: profileData.firstName,
@@ -144,7 +200,7 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
            </div>
            <div className="p-5 bg-slate-900 rounded-[2rem] text-white shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-600/10 rounded-full blur-[40px]"></div>
-              <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">إجمالي الإنجاز</p>
+              <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">إجمالي الإنجاز {user.isDemo && '(Demo)'}</p>
               <div className="flex items-end gap-2 mb-3">
                  <span className="text-4xl font-black">{stats.progress}%</span>
                  <span className="text-[9px] font-bold text-slate-500 mb-1">PRO</span>
@@ -183,6 +239,19 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col p-10 overflow-y-auto">
+        {user.isDemo && (
+          <div className="mb-10 p-4 bg-amber-50 border border-amber-200 rounded-3xl flex items-center justify-between animate-pulse">
+             <div className="flex items-center gap-4">
+                <span className="text-2xl">🚧</span>
+                <div>
+                   <p className="text-sm font-black text-amber-900">نمط الحساب التجريبي نشط</p>
+                   <p className="text-[10px] font-bold text-amber-700">يمكنك استكشاف جميع الميزات، ولكن لن يتم حفظ التغييرات بشكل دائم.</p>
+                </div>
+             </div>
+             <button onClick={onLogout} className="px-6 py-2 bg-amber-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-amber-800 transition-all">سجل حسابك الحقيقي</button>
+          </div>
+        )}
+
         <header className="flex justify-between items-center mb-12">
            <div>
               <h2 className="text-4xl font-black text-slate-900 tracking-tight">
@@ -198,6 +267,15 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
            </div>
            
            <div className="flex gap-4">
+              {activeTab === 'roadmap' && (
+                <button 
+                  onClick={handleOptimizeUI} 
+                  disabled={isOptimizing}
+                  className="px-6 py-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-2xl shadow-xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 transition-all hover:scale-105 active:scale-95 disabled:opacity-50"
+                >
+                  {isOptimizing ? 'جاري التحسين...' : '✨ تحسين بصري بالذكاء الاصطناعي'}
+                </button>
+              )}
               <div className="px-6 py-3 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col items-center">
                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">المحطات المكتملة</p>
                  <p className="text-2xl font-black text-blue-600">{stats.completedCount} / {roadmap.length}</p>
@@ -207,7 +285,6 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
 
         {activeTab === 'roadmap' && (
           <div className="space-y-12 animate-fade-up">
-            {/* Visual Flow Guide */}
             <div className="relative pt-8 pb-12 px-10 bg-white rounded-[3rem] border border-slate-100 shadow-sm overflow-hidden">
                <div className="absolute top-0 left-0 w-full h-1 bg-slate-100">
                   <div className="h-full bg-blue-600 transition-all duration-1000 ease-out" style={{width: `${stats.progress}%`}}></div>
@@ -229,66 +306,79 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 pb-20">
-              {roadmap.map((level) => (
-                <div 
-                  key={level.id}
-                  onClick={() => !level.isLocked && setSelectedLevel(level)}
-                  className={`group relative bg-white border border-slate-100 rounded-[3.5rem] overflow-hidden shadow-sm transition-all duration-500 
-                    ${level.isLocked ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-pointer hover:-translate-y-4 hover:shadow-3xl hover:border-blue-200'}
-                  `}
-                >
-                  <div className="aspect-[16/10] relative overflow-hidden">
-                     <img src={level.imageUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="" />
-                     <div className={`absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent transition-opacity ${level.isLocked ? 'opacity-80' : 'opacity-60'}`}></div>
-                     
-                     <div className="absolute top-6 right-6 flex flex-col items-end gap-3">
-                        <div className={`w-16 h-16 bg-gradient-to-br ${getGradientForColor(level.customColor)} rounded-[1.8rem] flex items-center justify-center text-4xl shadow-2xl text-white transform group-hover:rotate-6 transition-transform`}>
-                          {level.isCompleted ? '✓' : level.icon}
-                        </div>
-                        {level.isCompleted && (
-                          <span className="px-4 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-xl shadow-lg uppercase tracking-[0.2em]">Validated</span>
-                        )}
-                     </div>
-
-                     <div className="absolute bottom-8 left-8 right-8 text-right">
-                        <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em] mb-1"> المحطة 0{level.id}</p>
-                        <h3 className="text-2xl font-black text-white leading-tight">{level.title}</h3>
-                     </div>
-                  </div>
-
-                  <div className="p-10 space-y-8">
-                     <p className="text-slate-500 text-sm font-medium leading-relaxed line-clamp-2">{level.description}</p>
-                     
-                     {/* Per-Card Progress */}
-                     <div className="space-y-4">
-                        <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                           <span>حالة التقدم</span>
-                           <span>{level.isCompleted ? '100%' : level.isLocked ? '0%' : 'جاري التنفيذ'}</span>
-                        </div>
-                        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                           <div className={`h-full transition-all duration-1000 ${level.isCompleted ? 'bg-emerald-500 w-full' : level.isLocked ? 'w-0' : 'bg-blue-600 w-1/3 animate-pulse'}`}></div>
-                        </div>
-                     </div>
-
-                     <div className="pt-8 border-t border-slate-50 flex items-center justify-between">
-                        <div className="flex -space-x-2 space-x-reverse overflow-hidden">
-                           {[1, 2, 3].map(i => (
-                             <div key={i} className={`w-3 h-3 rounded-full border-2 border-white ${level.isCompleted ? 'bg-emerald-400' : 'bg-slate-200'}`}></div>
-                           ))}
-                        </div>
-                        {!level.isLocked ? (
-                          <button className="bg-slate-950 text-white px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest group-hover:bg-blue-600 transition-all hover:scale-105 active:scale-95">
-                            {level.isCompleted ? 'مراجعة المواد' : 'بدء المرحلة'}
-                          </button>
-                        ) : (
-                          <div className="flex items-center gap-2 text-slate-300 font-black text-[10px] uppercase">
-                             🔒 محطة مغلقة
+              {roadmap.map((level) => {
+                const isCurrent = !level.isCompleted && !level.isLocked;
+                const activeColorClass = getTailwindBgColor(level.customColor);
+                const activeShadowClass = getTailwindShadowColor(level.customColor);
+                
+                return (
+                  <div 
+                    key={level.id}
+                    onClick={() => !level.isLocked && setSelectedLevel(level)}
+                    className={`group relative bg-white border border-slate-100 rounded-[3.5rem] overflow-hidden shadow-sm transition-all duration-500 
+                      ${level.isLocked ? 'opacity-60 grayscale cursor-not-allowed' : 'cursor-pointer hover:-translate-y-4 hover:shadow-3xl hover:border-blue-200'}
+                    `}
+                  >
+                    <div className="aspect-[16/10] relative overflow-hidden">
+                       <img src={level.imageUrl} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="" />
+                       <div className={`absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent transition-opacity ${level.isLocked ? 'opacity-80' : 'opacity-60'}`}></div>
+                       
+                       <div className="absolute top-6 right-6 flex flex-col items-end gap-3">
+                          <div className={`w-16 h-16 bg-gradient-to-br ${getGradientForColor(level.customColor)} rounded-[1.8rem] flex items-center justify-center text-4xl shadow-2xl text-white transform group-hover:rotate-6 transition-transform`}>
+                            {level.isCompleted ? '✓' : level.icon}
                           </div>
-                        )}
-                     </div>
+                          {level.isCompleted && (
+                            <span className="px-4 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-xl shadow-lg uppercase tracking-[0.2em]">Validated</span>
+                          )}
+                       </div>
+
+                       <div className="absolute bottom-8 left-8 right-8 text-right">
+                          <p className="text-[10px] font-black text-blue-400 uppercase tracking-[0.4em] mb-1"> المحطة 0{level.id}</p>
+                          <h3 className="text-2xl font-black text-white leading-tight">{level.title}</h3>
+                       </div>
+                    </div>
+
+                    <div className="p-10 space-y-8">
+                       <p className="text-slate-500 text-sm font-medium leading-relaxed line-clamp-2">{level.description}</p>
+                       
+                       <div className="space-y-4">
+                          <div className="flex justify-between items-center text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                             <span>حالة التقدم</span>
+                             <span className={isCurrent ? 'text-blue-600 font-black' : ''}>
+                                {level.isCompleted ? '100%' : level.isLocked ? '0%' : 'المرحلة النشطة'}
+                             </span>
+                          </div>
+                          <div className={`h-3 rounded-full overflow-hidden transition-all duration-500 ${isCurrent ? 'bg-slate-100 ring-4 ring-slate-50' : 'bg-slate-100'}`}>
+                             <div 
+                                className={`h-full transition-all duration-1000 ${
+                                  level.isCompleted ? 'bg-emerald-500 w-full' : 
+                                  level.isLocked ? 'w-0' : 
+                                  `${activeColorClass} w-1/3 animate-pulse shadow-[0_0_15px_rgba(37,99,235,0.4)] ${activeShadowClass}`
+                                }`}
+                             ></div>
+                          </div>
+                       </div>
+
+                       <div className="pt-8 border-t border-slate-50 flex items-center justify-between">
+                          <div className="flex -space-x-2 space-x-reverse overflow-hidden">
+                             {[1, 2, 3].map(i => (
+                               <div key={i} className={`w-3 h-3 rounded-full border-2 border-white transition-all duration-500 ${level.isCompleted ? 'bg-emerald-400' : isCurrent ? `${activeColorClass} animate-bounce` : 'bg-slate-200'}`} style={{animationDelay: `${i*0.2}s`}}></div>
+                             ))}
+                          </div>
+                          {!level.isLocked ? (
+                            <button className={`px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${isCurrent ? `${activeColorClass} text-white shadow-xl ${activeShadowClass}` : 'bg-slate-950 text-white group-hover:bg-blue-600'}`}>
+                              {level.isCompleted ? 'مراجعة المواد' : 'بدء المرحلة'}
+                            </button>
+                          ) : (
+                            <div className="flex items-center gap-2 text-slate-300 font-black text-[10px] uppercase">
+                               🔒 محطة مغلقة
+                            </div>
+                          )}
+                       </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -303,9 +393,9 @@ export const DashboardHub: React.FC<DashboardHubProps> = ({ user, onLogout }) =>
                <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
                   <div className="md:col-span-1 flex flex-col items-center gap-6">
                      <label className={labelClass}>شعار الشركة</label>
-                     <div onClick={() => fileInputRef.current?.click()} className="w-48 h-48 rounded-[3rem] border-4 border-dashed border-slate-100 bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all group relative overflow-hidden">
+                     <div onClick={() => !user.isDemo && fileInputRef.current?.click()} className={`w-48 h-48 rounded-[3rem] border-4 border-dashed border-slate-100 bg-slate-50 flex flex-col items-center justify-center ${user.isDemo ? 'cursor-not-allowed opacity-50' : 'cursor-pointer hover:border-blue-300 hover:bg-blue-50'} transition-all group relative overflow-hidden`}>
                         {profileData.logo ? <img src={profileData.logo} className="w-full h-full object-cover" alt="Logo" /> : <span className="text-4xl opacity-20">🖼️</span>}
-                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />
+                        {!user.isDemo && <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload} />}
                      </div>
                   </div>
                   <div className="md:col-span-2 space-y-8">

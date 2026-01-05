@@ -11,12 +11,12 @@ export interface Badge {
 }
 
 export const ACADEMY_BADGES: Badge[] = [
-  { id: 'b1', levelId: 1, name: 'رائد أعمال طموح', icon: '🔍', description: 'اجتياز مرحلة التحقق الاستراتيجي من الفكرة.', color: 'from-blue-400 to-blue-600' },
-  { id: 'b2', levelId: 2, name: 'مخطط استراتيجي', icon: '📐', description: 'إتقان صياغة نماذج العمل التجارية المبتكرة.', color: 'from-emerald-400 to-emerald-600' },
-  { id: 'b3', levelId: 3, name: 'مهندس منتجات', icon: '📦', description: 'بناء النسخة الأولية القابلة للاختبار (MVP).', color: 'from-indigo-400 to-indigo-600' },
-  { id: 'b4', levelId: 4, name: 'محلل نمو', icon: '🎯', description: 'فهم مؤشرات السوق وخطط الاستحواذ والنمو.', color: 'from-amber-400 to-amber-600' },
+  { id: 'b1', levelId: 1, name: 'رائد أعمال طموح', icon: '🔭', description: 'اجتياز مرحلة التحقق الاستراتيجي من الفكرة.', color: 'from-blue-400 to-blue-600' },
+  { id: 'b2', levelId: 2, name: 'مخطط استراتيجي', icon: '🧩', description: 'إتقان صياغة نماذج العمل التجارية المبتكرة.', color: 'from-emerald-400 to-emerald-600' },
+  { id: 'b3', levelId: 3, name: 'مهندس منتجات', icon: '🛠️', description: 'بناء النسخة الأولية القابلة للاختبار (MVP).', color: 'from-indigo-400 to-indigo-600' },
+  { id: 'b4', levelId: 4, name: 'محلل نمو', icon: '📈', description: 'فهم مؤشرات السوق وخطط الاستحواذ والنمو.', color: 'from-amber-400 to-amber-600' },
   { id: 'b5', levelId: 5, name: 'خبير مالي', icon: '💎', description: 'بناء النماذج المالية وتوقعات التدفقات النقدية.', color: 'from-rose-400 to-rose-600' },
-  { id: 'b6', levelId: 6, name: 'رائد أعمال متمرس', icon: '🏛️', description: 'الجاهزية التامة لعرض المشروع على المستثمرين.', color: 'from-slate-700 to-slate-900' }
+  { id: 'b6', levelId: 6, name: 'رائد أعمال متمرس', icon: '🤝', description: 'الجاهزية التامة لعرض المشروع على المستثمرين.', color: 'from-slate-700 to-slate-900' }
 ];
 
 export interface Partner {
@@ -37,6 +37,7 @@ export interface UserProfile {
   agreedToTerms: boolean;
   agreedToContract: boolean;
   contractSignedAt?: string;
+  isDemo?: boolean;
   
   startupName?: string;
   startupType?: 'Startup' | 'Existing' | 'Tech';
@@ -49,9 +50,8 @@ export interface UserProfile {
   founderBio?: string;
   website?: string;
   linkedin?: string;
-  earnedBadges?: string[]; // IDs of earned badges
+  earnedBadges?: string[];
 
-  // Registration specifics
   existingRoles?: string[];
   missingRoles?: string[];
   supportNeeded?: string[];
@@ -68,7 +68,7 @@ export interface LevelData {
   imageUrl: string;
   isLocked: boolean;
   isCompleted: boolean;
-  customColor?: string; // Tiers: blue, emerald, indigo, amber, rose, slate
+  customColor?: string;
 }
 
 export interface TaskRecord {
@@ -94,12 +94,12 @@ export interface TaskRecord {
 }
 
 export const INITIAL_ROADMAP: LevelData[] = [
-  { id: 1, title: 'التحقق الاستراتيجي', description: 'التثبت من وجود مشكلة حقيقية في السوق والتحقق من الفرضيات.', icon: '🔍', imageUrl: 'https://images.unsplash.com/photo-1454165833767-13143891bb39?auto=format&fit=crop&q=80&w=600', isLocked: false, isCompleted: false, customColor: 'blue' },
-  { id: 2, title: 'هيكلة نموذج العمل', description: 'تصميم محرك الإيرادات والقيمة المضافة للمشروع.', icon: '📐', imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'emerald' },
-  { id: 3, title: 'هندسة المنتج (MVP)', description: 'تحديد المزايا الجوهرية وبناء النسخة الأولى القابلة للاختبار.', icon: '📦', imageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'indigo' },
-  { id: 4, title: 'تحليل الجدوى والنمو', description: 'دراسة حجم السوق، المنافسين، وخطط الاستحواذ.', icon: '🎯', imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'amber' },
+  { id: 1, title: 'التحقق الاستراتيجي', description: 'التثبت من وجود مشكلة حقيقية في السوق والتحقق من الفرضيات.', icon: '🔭', imageUrl: 'https://images.unsplash.com/photo-1454165833767-13143891bb39?auto=format&fit=crop&q=80&w=600', isLocked: false, isCompleted: false, customColor: 'blue' },
+  { id: 2, title: 'هيكلة نموذج العمل', description: 'تصميم محرك الإيرادات والقيمة المضافة للمشروع.', icon: '🧩', imageUrl: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'emerald' },
+  { id: 3, title: 'هندسة المنتج (MVP)', description: 'تحديد المزايا الجوهرية وبناء النسخة الأولى القابلة للاختبار.', icon: '🛠️', imageUrl: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'indigo' },
+  { id: 4, title: 'تحليل الجدوى والنمو', description: 'دراسة حجم السوق، المنافسين، وخطط الاستحواذ.', icon: '📈', imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'amber' },
   { id: 5, title: 'النمذجة المالية', description: 'التوقعات المالية، التقييم، والاحتياج التمويلي.', icon: '💎', imageUrl: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'rose' },
-  { id: 6, title: 'جاهزية الاستثمار', description: 'إعداد العرض التقديمي النهائي ومحاكاة لجان التحكيم.', icon: '🏛️', imageUrl: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'slate' }
+  { id: 6, title: 'جاهزية الاستثمار', description: 'إعداد العرض التقديمي النهائي ومحاكاة لجان التحكيم.', icon: '🤝', imageUrl: 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&q=80&w=600', isLocked: true, isCompleted: false, customColor: 'slate' }
 ];
 
 export enum FiltrationStage { 
@@ -130,6 +130,7 @@ export interface UserRecord {
   phone: string;
   earnedBadges?: string[];
   founderBio?: string;
+  isDemo?: boolean;
 }
 
 export type ProjectTrack = 'Idea' | 'Prototype' | 'Product' | 'MVP' | 'Growth' | 'Investment Ready';
@@ -151,6 +152,7 @@ export interface StartupRecord {
   website?: string;
   linkedin?: string;
   aiClassification?: 'Green' | 'Yellow' | 'Red';
+  isDemo?: boolean;
 }
 
 export interface PartnerProfile {
@@ -191,9 +193,9 @@ export interface MatchResult {
 }
 
 export const DIGITAL_SHIELDS = [
-  { id: 's1', name: 'التحقق الاستراتيجي', icon: '🔍', color: 'from-blue-400 to-blue-600' },
-  { id: 's2', name: 'هيكلة الأعمال', icon: '📐', color: 'from-emerald-400 to-emerald-600' },
-  { id: 's3', name: 'هندسة المنتج', icon: '📦', color: 'from-indigo-400 to-indigo-600' },
+  { id: 's1', name: 'التحقق الاستراتيجي', icon: '🔭', color: 'from-blue-400 to-blue-600' },
+  { id: 's2', name: 'هيكلة الأعمال', icon: '🧩', color: 'from-emerald-400 to-emerald-600' },
+  { id: 's3', name: 'هندسة المنتج', icon: '🛠️', color: 'from-indigo-400 to-indigo-600' },
 ];
 
 export const SECTORS = [
@@ -253,7 +255,6 @@ export interface ProgramRating {
   submittedAt: string;
 }
 
-// Fixed missing types for ApplicantProfile
 export type ProjectStageType = 'Idea' | 'Prototype' | 'Product';
 export type TechLevelType = 'Low' | 'Medium' | 'High';
 export interface ApplicantProfile {
@@ -264,14 +265,12 @@ export interface ApplicantProfile {
   techLevel: TechLevelType;
 }
 
-// Fixed missing type for PersonalityQuestion
 export interface PersonalityQuestion {
   id: number;
   situation: string;
   options: { text: string; style: string }[];
 }
 
-// Fixed missing type for AnalyticalQuestion
 export interface AnalyticalQuestion {
   text: string;
   options: string[];
@@ -279,7 +278,6 @@ export interface AnalyticalQuestion {
   difficulty: 'Easy' | 'Medium' | 'Hard';
 }
 
-// Fixed missing type for RadarMetrics
 export interface RadarMetrics {
   readiness: number;
   analysis: number;
@@ -289,7 +287,6 @@ export interface RadarMetrics {
   ethics: number;
 }
 
-// Fixed missing type for ProjectEvaluationResult
 export interface ProjectEvaluationResult {
   totalScore: number;
   classification: 'Green' | 'Yellow' | 'Red';
@@ -303,7 +300,6 @@ export interface ProjectEvaluationResult {
   aiOpinion: string;
 }
 
-// Fixed missing type for FinalResult
 export interface FinalResult {
   score: number;
   isQualified: boolean;
@@ -313,7 +309,6 @@ export interface FinalResult {
   badges: Badge[];
 }
 
-// Fixed missing types for ProjectBuilder
 export type AgentCategory = 'Vision' | 'Market' | 'User' | 'Opportunity';
 export interface AIAgent {
   id: string;
@@ -342,7 +337,6 @@ export const AVAILABLE_AGENTS: AIAgent[] = [
   { id: 'a4', name: 'Growth Hacker', description: 'Identifies expansion opportunities and scaling paths.', category: 'Opportunity' },
 ];
 
-// Fixed missing type for FailureSimulation
 export interface FailureSimulation {
   brutalTruth: string;
   probability: number;
@@ -352,7 +346,6 @@ export interface FailureSimulation {
   recoveryPlan: string[];
 }
 
-// Fixed missing type for GovStats
 export interface GovStats {
   riskyMarkets: { name: string; failRate: number }[];
   readySectors: { name: string; score: number }[];
@@ -360,7 +353,6 @@ export interface GovStats {
   regulatoryGaps: string[];
 }
 
-// Fixed missing type for ActivityLogRecord
 export interface ActivityLogRecord {
   id: string;
   uid: string;
@@ -377,7 +369,6 @@ export const TASKS_CONFIG = [
   { id: 't3', title: 'هندسة المنتج' }
 ];
 
-// Fixed missing types for Nomination
 export interface NominationData {
   companyName: string;
   founderName: string;
@@ -412,7 +403,6 @@ export interface NominationResult {
   aiAnalysis: string;
 }
 
-// Fixed missing type for MentorProfile
 export interface MentorProfile {
   id: string;
   name: string;
@@ -426,7 +416,6 @@ export interface MentorProfile {
   tags: string[];
 }
 
-// Fixed missing types for TemplateLibrary
 export interface TemplateField {
   id: string;
   label: string;

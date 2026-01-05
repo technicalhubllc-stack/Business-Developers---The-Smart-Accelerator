@@ -54,10 +54,11 @@ function App() {
           name: `${userRec.firstName} ${userRec.lastName}`,
           startupDescription: startup?.description || '',
           industry: startup?.industry || '',
+          isDemo: userRec.isDemo,
+          agreedToTerms: true,
+          agreedToContract: true
         });
         
-        // Reset Logic: Bypassing mandatory apply form for smoother demo experience
-        // All users go directly to their respective hubs
         setStage(FiltrationStage.DASHBOARD);
       }
     }
@@ -77,11 +78,17 @@ function App() {
     hydrateSession();
   };
 
+  const handleQuickDemo = () => {
+    storageService.createDemoSession();
+    hydrateSession();
+  };
+
   return (
     <div className={`antialiased ${t.dir === 'rtl' ? 'text-right' : 'text-left'}`} dir={t.dir}>
       {stage === FiltrationStage.LANDING && (
         <LandingPage 
           onStart={() => { setRegistrationRole('STARTUP'); setStage(FiltrationStage.WELCOME); }} 
+          onQuickDemo={handleQuickDemo}
           onPathFinder={() => setStage(FiltrationStage.AI_MENTOR_CONCEPT)} 
           onSmartFeatures={() => {}} 
           onGovDashboard={() => {}} 

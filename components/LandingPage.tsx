@@ -4,6 +4,7 @@ import { Language, getTranslation } from '../services/i18nService';
 
 interface LandingPageProps {
   onStart: () => void;
+  onQuickDemo: () => void;
   onPathFinder: () => void;
   onSmartFeatures: () => void;
   onGovDashboard: () => void;
@@ -23,7 +24,7 @@ interface LandingPageProps {
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({ 
-  onStart, onRoadmap, onTools, onMentorship, onIncubation, 
+  onStart, onQuickDemo, onRoadmap, onTools, onMentorship, onIncubation, 
   onMemberships, onPartnerConcept, onLogin, onAchievements,
   onAIMentorConcept,
   lang 
@@ -57,6 +58,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
              <button onClick={onTools} className="hover:text-blue-600 transition-colors">الأدوات</button>
              <button onClick={onAchievements} className="hover:text-blue-600 transition-colors">الأثر</button>
              <div className="w-px h-4 bg-slate-200 dark:bg-slate-800"></div>
+             <button onClick={onQuickDemo} className="text-blue-600 hover:text-blue-700 transition-colors underline underline-offset-4">تجربة محاكاة</button>
              <button onClick={onLogin} className="text-slate-900 dark:text-white hover:text-blue-600 transition-colors">دخول</button>
              <button onClick={onStart} className="bg-blue-600 text-white px-8 py-3.5 rounded-xl font-black shadow-xl hover:bg-blue-700 transition-all active:scale-95">ابدأ الآن</button>
           </div>
@@ -79,9 +81,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
             <div className="flex flex-col sm:flex-row gap-5 pt-4">
               <button onClick={onStart} className="px-12 py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-2xl hover:bg-blue-700 transition-all active:scale-95">ابدأ رحلة البناء</button>
-              <button onClick={onAIMentorConcept} className="px-12 py-5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-2xl font-black text-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-3">
-                 <span>تجربة الموجه الذكي</span>
-                 <span className="text-blue-600">🤖</span>
+              <button onClick={onQuickDemo} className="px-12 py-5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white rounded-2xl font-black text-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 transition-all flex items-center justify-center gap-3 group">
+                 <span>استكشاف كحساب تجريبي</span>
+                 <span className="group-hover:translate-x-[-4px] transition-transform">✨</span>
               </button>
             </div>
             

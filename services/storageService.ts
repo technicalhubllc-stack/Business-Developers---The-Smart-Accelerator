@@ -33,7 +33,8 @@ export const storageService = {
       lastName: profile.lastName,
       email: profile.email,
       role: role,
-      phone: profile.phone
+      phone: profile.phone,
+      isDemo: profile.isDemo
     };
 
     let newStartup: StartupRecord | undefined;
@@ -49,7 +50,8 @@ export const storageService = {
         metrics: { readiness: 10, tech: 0, market: 0 },
         aiOpinion: 'قيد التقييم الأولي',
         lastActivity: new Date().toISOString(),
-        partners: []
+        partners: [],
+        isDemo: profile.isDemo
       };
       const startups = JSON.parse(localStorage.getItem(DB_KEYS.STARTUPS) || '[]');
       safeSetItem(DB_KEYS.STARTUPS, JSON.stringify([...startups, newStartup]));
@@ -70,12 +72,30 @@ export const storageService = {
     const users = JSON.parse(localStorage.getItem(DB_KEYS.USERS) || '[]');
     safeSetItem(DB_KEYS.USERS, JSON.stringify([...users, { ...newUser, earnedBadges: [] }]));
     
-    // Don't auto-set session for internal seeding, only for actual registration flow
     if (!profile.uid?.startsWith('seed_')) {
       safeSetItem(DB_KEYS.SESSION, JSON.stringify({ uid, projectId: newStartup?.projectId }));
     }
 
     return { user: newUser, startup: newStartup };
+  },
+
+  createDemoSession: (): { uid: string; projectId: string } => {
+    const demoProfile: UserProfile = {
+      firstName: 'مستكشف',
+      lastName: 'المنصة',
+      email: `demo_${Date.now()}@virtual.ai`,
+      phone: '0500000000',
+      startupName: 'مشروع افتراضي ذكي',
+      startupDescription: 'هذا حساب تجريبي لاستكشاف ميزات المسرعة الذكية.',
+      industry: 'Artificial Intelligence (AI)',
+      agreedToTerms: true,
+      agreedToContract: true,
+      isDemo: true,
+      role: 'STARTUP'
+    };
+    
+    const { user, startup } = storageService.registerUser(demoProfile);
+    return { uid: user.uid, projectId: startup?.projectId || '' };
   },
 
   updateUserBadges: (uid: string, badgeId: string) => {
@@ -190,7 +210,6 @@ export const storageService = {
     });
     safeSetItem(DB_KEYS.TASKS, JSON.stringify(updatedTasks));
 
-    // Award Badge
     const badge = ACADEMY_BADGES.find(b => b.levelId === currentTask.levelId);
     if (badge) {
       storageService.updateUserBadges(uid, badge.id);
@@ -226,7 +245,6 @@ export const storageService = {
   seedDemoAccounts: () => {
     if (localStorage.getItem(DB_KEYS.USERS)) return;
 
-    // 1. Seed Startup Admin (The default "Fiacal")
     storageService.registerUser({
        uid: 'seed_startup_1',
        firstName: 'فيصل', lastName: 'المؤسس', email: 'startup@demo.com', phone: '0500000000',
@@ -235,7 +253,6 @@ export const storageService = {
        role: 'STARTUP'
     });
 
-    // 2. Seed Strategic Partner (Co-Founder)
     const partnerInfo = storageService.registerUser({
        uid: 'seed_partner_1',
        firstName: 'عبدالرحمن', lastName: 'التقني', email: 'partner@demo.com', phone: '0511111111',
@@ -247,9 +264,9 @@ export const storageService = {
       email: 'partner@demo.com',
       primaryRole: 'CTO',
       experienceYears: 12,
-      bio: 'خبير في بناء الأنظمة الموزعة وتطبيقات الويب عالية الأداء. قمت بقيادة فرق تقنية في ٣ شركات ناشئة ناجحة.',
+      bio: 'خبير في بناء الأنظمة الموزعة وتطبيقات الويب عالية الأداء.',
       linkedin: 'https://linkedin.com/in/demo-partner',
-      skills: ['React', 'Node.js', 'Kubernetes', 'AI/ML'],
+      skills: ['React', 'Node.js'],
       availabilityHours: 25,
       commitmentType: 'Part-time',
       city: 'الرياض',
@@ -260,21 +277,18 @@ export const storageService = {
       profileCompletion: 100
     });
 
-    // 3. Seed Expert Mentor
     storageService.registerUser({
        uid: 'seed_mentor_1',
        firstName: 'د. ليلى', lastName: 'الاستشارية', email: 'mentor@demo.com', phone: '0522222222',
        agreedToTerms: true, agreedToContract: true, role: 'MENTOR'
     });
 
-    // 4. Seed Platform Admin
     storageService.registerUser({
        uid: 'seed_admin_1',
        firstName: 'مدير', lastName: 'المنصة', email: 'admin@demo.com', phone: '0533333333',
        agreedToTerms: true, agreedToContract: true, role: 'ADMIN'
     });
 
-    // Clear session to ensure user has to pick a role to start
     localStorage.removeItem(DB_KEYS.SESSION);
   }
 };
